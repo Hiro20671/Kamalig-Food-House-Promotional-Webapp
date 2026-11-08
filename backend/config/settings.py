@@ -1,5 +1,6 @@
 import os
 import sys
+import socket
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
@@ -94,26 +95,55 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
-# Database configuration: Supports PostgreSQL via DATABASE_URL or DB_ENGINE=postgresql,
-# with seamless local SQLite fallback when local PostgreSQL service is not active.
+# Database configuration: Supports PostgreSQL via DATABASE_URL (e.g. Aiven kamalig_db)
+# with automatic fallback to local SQLite if the host environment (e.g. PythonAnywhere Free tier)
+# blocks outbound TCP connections to external PostgreSQL ports.
 DATABASE_URL = os.getenv('DATABASE_URL', '').strip()
 DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite3').strip().lower()
 
+
+def _is_tcp_reachable(host, port, timeout=2.5):
+    if not host or not port:
+        return True
+    try:
+        with socket.create_connection((host, int(port)), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
 if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
-    }
-elif DB_ENGINE in ('postgresql', 'postgres', 'django.db.backends.postgresql'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'kamalig_db'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+    _parsed_db = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    if _is_tcp_reachable(_parsed_db.get('HOST'), _parsed_db.get('PORT')):
+        DATABASES = {'default': _parsed_db}
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
         }
-    }
+elif DB_ENGINE in ('postgresql', 'postgres', 'django.db.backends.postgresql'):
+    _pg_host = os.getenv('DB_HOST', 'localhost')
+    _pg_port = os.getenv('DB_PORT', '5432')
+    if _is_tcp_reachable(_pg_host, _pg_port):
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('DB_NAME', 'kamalig_db'),
+                'USER': os.getenv('DB_USER', 'postgres'),
+                'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+                'HOST': _pg_host,
+                'PORT': _pg_port,
+            }
+        }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 else:
     DATABASES = {
         'default': {
