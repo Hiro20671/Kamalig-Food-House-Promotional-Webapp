@@ -1,9 +1,9 @@
 {
-  "id": "/",
-  "name": "Kamalig Food House",
+  "id": "/?app=kamalig-fh",
+  "name": "Kamalig FH",
   "short_name": "Kamalig FH",
   "description": "Good Food, Great Mood! Sarap na Abot-Kaya! Official Digital Menu, Location Guide & Owner CMS of Kamalig Food House in Lucena City.",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -12,25 +12,25 @@
   "categories": ["food", "lifestyle", "business"],
   "icons": [
     {
-      "src": "/pwa-192x192.png",
+      "src": "/kamalig-fh-192.png?v=kamalig2026",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/pwa-192x192.png",
+      "src": "/kamalig-fh-192.png?v=kamalig2026",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/pwa-512x512.png",
+      "src": "/kamalig-fh-512.png?v=kamalig2026",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/pwa-512x512.png",
+      "src": "/kamalig-fh-512.png?v=kamalig2026",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -42,21 +42,21 @@
       "short_name": "Menu",
       "description": "Explore Kamalig Food House meals and drinks",
       "url": "/menu",
-      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/kamalig-fh-192.png?v=kamalig2026", "sizes": "192x192" }]
     },
     {
       "name": "Get Directions",
       "short_name": "Directions",
       "description": "Navigate to Kamalig Food House in Lucena City",
       "url": "/location",
-      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/kamalig-fh-192.png?v=kamalig2026", "sizes": "192x192" }]
     },
     {
       "name": "Owner CMS Login",
       "short_name": "Owner CMS",
       "description": "Manage menu, photos, and website content from your phone",
       "url": "/admin/login",
-      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/kamalig-fh-192.png?v=kamalig2026", "sizes": "192x192" }]
     }
   ]
 }

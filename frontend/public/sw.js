@@ -1,13 +1,14 @@
-const CACHE_NAME = 'kamalig-public-v2';
+const CACHE_NAME = 'kamalig-fh-pwa-v4';
 const PUBLIC_SHELL = [
   '/',
   '/index.html',
   '/offline.html',
+  '/kamalig-manifest.json?v=kamalig2026',
   '/manifest.json',
   '/kamalig-logo.png',
-  '/pwa-192x192.png',
-  '/pwa-512x512.png',
-  '/apple-touch-icon.png',
+  '/kamalig-fh-192.png?v=kamalig2026',
+  '/kamalig-fh-512.png?v=kamalig2026',
+  '/kamalig-fh-apple-180.png?v=kamalig2026',
 ];
 
 self.addEventListener('install', (event) => {
@@ -36,6 +37,18 @@ self.addEventListener('fetch', (event) => {
     url.pathname.startsWith('/api/admin') ||
     url.pathname.startsWith('/django-admin')
   ) {
+    return;
+  }
+
+  // Always fetch fresh manifest & icons first so old cached apps never override Kamalig FH
+  if (
+    url.pathname.endsWith('manifest.json') ||
+    url.pathname.includes('kamalig-fh-') ||
+    url.pathname.includes('pwa-')
+  ) {
+    event.respondWith(
+      fetch(event.request, { cache: 'reload' }).catch(() => caches.match(event.request))
+    );
     return;
   }
 

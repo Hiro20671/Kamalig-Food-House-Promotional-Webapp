@@ -30,3 +30,4 @@ python manage.py collectstatic --noinput
 echo "=========================================================="
 echo " Backend setup complete! Next: Reload your Web App tab."
 echo "=========================================================="
+

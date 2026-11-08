@@ -117,11 +117,16 @@ def serve_react_spa(request, resource_path=''):
     if resource_path:
         candidate = (dist_dir / resource_path).resolve()
         if str(candidate).startswith(str(dist_dir.resolve())) and candidate.is_file():
-            return static_serve(request, resource_path, document_root=str(dist_dir))
+            resp = static_serve(request, resource_path, document_root=str(dist_dir))
+            if resource_path.endswith('.json') or resource_path.endswith('sw.js') or resource_path.endswith('.png'):
+                resp['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+            return resp
 
     index_file = dist_dir / 'index.html'
     if index_file.is_file():
-        return FileResponse(open(index_file, 'rb'), content_type='text/html')
+        resp = FileResponse(open(index_file, 'rb'), content_type='text/html')
+        resp['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        return resp
 
     return HttpResponseNotFound(
         'Frontend build not found. Run "npm run build" in the frontend directory.'
