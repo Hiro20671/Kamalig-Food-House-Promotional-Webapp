@@ -1,0 +1,7 @@
+from django.apps import AppConfig
+
+
+class BusinessInformationConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'apps.business_information'
+

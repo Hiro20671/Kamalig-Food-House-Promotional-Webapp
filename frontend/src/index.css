@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --kamalig-navy: #101C28;
+  --kamalig-charcoal: #171B20;
+  --kamalig-gold: #F6C928;
+  --kamalig-bright-yellow: #FFD83D;
+  --kamalig-cream: #FFF1C6;
+  --kamalig-cyan: #23C7DF;
+  --kamalig-orange: #F28A32;
+  --kamalig-pink: #F06BA6;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--kamalig-navy);
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #101C28;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #283848;
+  border-radius: 9999px;
+  border: 2px solid #101C28;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #F6C928;
+}
+
+/* Leaflet Map Dark/Branded Container Fixes */
+.leaflet-container {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  z-index: 10;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
