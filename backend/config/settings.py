@@ -112,7 +112,14 @@ def _is_tcp_reachable(host, port, timeout=2.5):
         return False
 
 
-if DATABASE_URL:
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+elif DATABASE_URL:
     _parsed_db = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     if _is_tcp_reachable(_parsed_db.get('HOST'), _parsed_db.get('PORT')):
         DATABASES = {'default': _parsed_db}
@@ -211,9 +218,9 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# Upload limits (10 MB max per image)
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+# Upload limits (25 MB max per image to support high-MP mobile camera photos)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024
 
 # Production proxy / HTTPS headers (PythonAnywhere terminates SSL at reverse proxy)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

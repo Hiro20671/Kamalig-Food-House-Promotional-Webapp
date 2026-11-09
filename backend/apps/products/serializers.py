@@ -1,4 +1,5 @@
 import json
+from django.utils import timezone
 from rest_framework import serializers
 from apps.products.models import Product, ProductImage, ProductVariant
 
@@ -27,6 +28,13 @@ class ProductSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     category_slug = serializers.CharField(source='category.slug', read_only=True)
     main_image_url = serializers.SerializerMethodField()
+    is_sold_out_today = serializers.SerializerMethodField()
+    mark_sold_out_today = serializers.BooleanField(
+        write_only=True,
+        required=False,
+        allow_null=True,
+        default=None,
+    )
     images = ProductImageSerializer(many=True, read_only=True)
     variants = ProductVariantSerializer(many=True, read_only=True)
     variants_payload = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -51,6 +59,9 @@ class ProductSerializer(serializers.ModelSerializer):
             'is_best_seller',
             'is_published',
             'is_archived',
+            'sold_out_date',
+            'is_sold_out_today',
+            'mark_sold_out_today',
             'display_order',
             'images',
             'variants',
@@ -63,6 +74,9 @@ class ProductSerializer(serializers.ModelSerializer):
         if not obj.main_image:
             return None
         return obj.main_image.url
+
+    def get_is_sold_out_today(self, obj):
+        return bool(obj.is_sold_out_today)
 
     def _sync_variants(self, product, variants_payload_str):
         if variants_payload_str is None:
@@ -97,6 +111,11 @@ class ProductSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         variants_payload = validated_data.pop('variants_payload', None)
         validated_data.pop('remove_main_image', False)
+        mark_sold_out_today = validated_data.pop('mark_sold_out_today', None)
+        if mark_sold_out_today is True:
+            validated_data['sold_out_date'] = timezone.localdate()
+        elif mark_sold_out_today is False:
+            validated_data['sold_out_date'] = None
         product = super().create(validated_data)
         if variants_payload is not None:
             self._sync_variants(product, variants_payload)
@@ -105,6 +124,11 @@ class ProductSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         variants_payload = validated_data.pop('variants_payload', None)
         remove_main_image = validated_data.pop('remove_main_image', False)
+        mark_sold_out_today = validated_data.pop('mark_sold_out_today', None)
+        if mark_sold_out_today is True:
+            validated_data['sold_out_date'] = timezone.localdate()
+        elif mark_sold_out_today is False:
+            validated_data['sold_out_date'] = None
         if remove_main_image and instance.main_image:
             instance.main_image.delete(save=False)
             instance.main_image = None

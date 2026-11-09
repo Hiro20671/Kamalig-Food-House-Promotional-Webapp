@@ -213,4 +213,35 @@ class KamaligFullStackApiTests(TestCase):
         self_del = self.client.delete(f'/api/admin/accounts/{owner_id}/')
         self.assertEqual(self_del.status_code, 400)
 
+    def test_one_day_sold_out_and_next_day_auto_reset(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from apps.products.models import Product
+
+        self.authenticate_owner()
+        product = Product.objects.filter(is_published=True, is_archived=False).first()
+
+        # 1. Owner marks product as Sold Out Today
+        res = self.client.patch(
+            f'/api/admin/products/{product.id}/',
+            {'mark_sold_out_today': 'true'},
+            format='multipart',
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.data['is_sold_out_today'])
+
+        # 2. Public menu reflects is_sold_out_today=True today
+        pub_detail = self.client.get(f'/api/public/products/{product.id}/')
+        self.assertEqual(pub_detail.status_code, 200)
+        self.assertTrue(pub_detail.data['is_sold_out_today'])
+
+        # 3. Simulate next day (sold_out_date was yesterday) -> automatically resets to Available!
+        Product.objects.filter(pk=product.id).update(
+            sold_out_date=timezone.localdate() - timedelta(days=1)
+        )
+        pub_detail_next_day = self.client.get(f'/api/public/products/{product.id}/')
+        self.assertEqual(pub_detail_next_day.status_code, 200)
+        self.assertFalse(pub_detail_next_day.data['is_sold_out_today'])
+
+
 

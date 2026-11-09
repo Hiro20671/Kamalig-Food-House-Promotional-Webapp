@@ -171,6 +171,9 @@ class PublicProductsView(APIView):
         if request.query_params.get('best_seller') == 'true':
             qs = qs.filter(is_best_seller=True)
 
+        if request.query_params.get('available_today') == 'true':
+            qs = qs.exclude(sold_out_date=timezone.localdate())
+
         serializer = ProductSerializer(qs, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -490,6 +493,7 @@ class AdminDashboardSummaryView(APIView):
         active_products = Product.objects.filter(is_archived=False)
         published_products_count = active_products.filter(is_published=True).count()
         hidden_products_count = active_products.filter(is_published=False).count()
+        sold_out_today_count = active_products.filter(sold_out_date=timezone.localdate()).count()
         archived_products_count = Product.objects.filter(is_archived=True).count()
         featured_products_count = active_products.filter(is_featured=True, is_published=True).count()
         best_seller_products_count = active_products.filter(is_best_seller=True, is_published=True).count()
@@ -528,6 +532,7 @@ class AdminDashboardSummaryView(APIView):
             'total_published_products': published_products_count,
             'total_products': active_products.count(),
             'hidden_or_unpublished_products': hidden_products_count,
+            'sold_out_today_products': sold_out_today_count,
             'archived_products': archived_products_count,
             'featured_products': featured_products_count,
             'best_seller_products': best_seller_products_count,

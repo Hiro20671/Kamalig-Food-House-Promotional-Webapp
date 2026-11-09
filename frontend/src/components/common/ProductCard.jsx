@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Award, Eye } from 'lucide-react';
+import { Sparkles, Award, Eye, Clock } from 'lucide-react';
 import ProductPlaceholder from './ProductPlaceholder';
 
 export function formatProductPrice(product) {
@@ -25,6 +25,7 @@ export function formatProductPrice(product) {
 export default function ProductCard({ product, onSelect }) {
   const displayPrice = formatProductPrice(product);
   const variantCount = (product.variants || []).length;
+  const isSoldOutToday = Boolean(product.is_sold_out_today);
 
   return (
     <div
@@ -37,7 +38,11 @@ export default function ProductCard({ product, onSelect }) {
           onSelect && onSelect(product);
         }
       }}
-      className="group relative flex flex-col rounded-2xl bg-[#171B20] border border-white/10 hover:border-[#F6C928]/60 overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-[#F6C928]/10 transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#F6C928]"
+      className={`group relative flex flex-col rounded-2xl bg-[#171B20] border overflow-hidden shadow-lg transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#F6C928] ${
+        isSoldOutToday
+          ? 'border-red-500/40 opacity-85 hover:opacity-100'
+          : 'border-white/10 hover:border-[#F6C928]/60 hover:shadow-2xl hover:shadow-[#F6C928]/10'
+      }`}
     >
       {/* Image Container */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#101C28]">
@@ -46,7 +51,9 @@ export default function ProductCard({ product, onSelect }) {
             src={product.main_image_url}
             alt={product.name}
             loading="lazy"
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            className={`w-full h-full object-cover object-center transition-transform duration-500 ${
+              isSoldOutToday ? 'grayscale-[45%]' : 'group-hover:scale-105'
+            }`}
           />
         ) : (
           <ProductPlaceholder product={product} />
@@ -59,8 +66,14 @@ export default function ProductCard({ product, onSelect }) {
           </span>
         </div>
 
-        {/* Featured / Best Seller Badges */}
+        {/* Sold Out Today / Featured / Best Seller Badges */}
         <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
+          {isSoldOutToday && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-red-600 text-white shadow-lg border border-red-400">
+              <Clock className="w-3.5 h-3.5" />
+              Sold Out Today
+            </span>
+          )}
           {product.is_best_seller && (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-[#F28A32] text-[#101C28] shadow-md">
               <Award className="w-3.5 h-3.5" />
@@ -106,7 +119,11 @@ export default function ProductCard({ product, onSelect }) {
 
         <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
           <div>
-            <span className="font-display font-extrabold text-xl text-[#F6C928]">
+            <span
+              className={`font-display font-extrabold text-xl ${
+                isSoldOutToday ? 'text-gray-400 line-through' : 'text-[#F6C928]'
+              }`}
+            >
               {displayPrice}
             </span>
             {product.price_note && product.price !== null && (
@@ -114,9 +131,18 @@ export default function ProductCard({ product, onSelect }) {
             )}
           </div>
 
-          {variantCount > 0 && (
+          {isSoldOutToday ? (
+            <span className="px-2.5 py-1 rounded-lg bg-red-500/15 border border-red-500/35 text-[11px] font-bold text-red-300">
+              Back Tomorrow
+            </span>
+          ) : variantCount > 0 ? (
             <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-[#23C7DF]">
               {variantCount} {variantCount === 1 ? 'Option' : 'Options'}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-semibold text-emerald-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              Available
             </span>
           )}
         </div>

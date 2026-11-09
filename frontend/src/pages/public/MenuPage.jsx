@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, Sparkles, Award, Utensils, X, Filter } from 'lucide-react';
+import { Search, Sparkles, Award, Utensils, X, Filter, CheckCircle2 } from 'lucide-react';
 import { publicApi } from '../../services/api';
 import ProductCard from '../../components/common/ProductCard';
 import ProductDetailModal from '../../components/common/ProductDetailModal';
@@ -67,9 +67,17 @@ export default function MenuPage() {
     [products]
   );
 
+  const availableTodayCount = useMemo(
+    () => products.filter((p) => !p.is_sold_out_today).length,
+    [products]
+  );
+
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       if (activeCategory !== 'all' && p.category_slug !== activeCategory && String(p.category) !== activeCategory) {
+        return false;
+      }
+      if (specialFilter === 'available' && p.is_sold_out_today) {
         return false;
       }
       if (specialFilter === 'featured' && !p.is_featured) {
@@ -168,6 +176,20 @@ export default function MenuPage() {
                 }`}
               >
                 All Items ({products.length})
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setSpecialFilter((prev) => (prev === 'available' ? 'all' : 'available'))
+                }
+                className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer ${
+                  specialFilter === 'available'
+                    ? 'bg-emerald-400 text-[#101C28]'
+                    : 'bg-[#171B20] text-emerald-300 border border-emerald-500/35 hover:bg-emerald-500/10'
+                }`}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Available Today ({availableTodayCount})
               </button>
               <button
                 type="button"

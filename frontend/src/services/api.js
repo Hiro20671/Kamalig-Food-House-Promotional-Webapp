@@ -1,3 +1,5 @@
+import { prepareImageForUpload } from '../utils/imageUpload';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 function getAuthHeaders(isFormData = false) {
@@ -12,10 +14,33 @@ function getAuthHeaders(isFormData = false) {
   return headers;
 }
 
+async function normalizeFormDataImages(formData) {
+  const entries = Array.from(formData.entries());
+  const hasBlobs = entries.some(([, val]) => val instanceof Blob);
+  if (!hasBlobs) return formData;
+
+  const normalized = new FormData();
+  for (const [key, val] of entries) {
+    if (val instanceof Blob) {
+      const processed = await prepareImageForUpload(val);
+      let fileName = processed.name || 'kamalig_upload.jpg';
+      if (!/\.(jpg|jpeg|png|webp)$/i.test(fileName)) {
+        fileName = `${fileName.replace(/[^a-zA-Z0-9_-]/g, '_') || 'kamalig_upload'}.jpg`;
+      }
+      normalized.append(key, processed, fileName);
+    } else {
+      normalized.append(key, val);
+    }
+  }
+  return normalized;
+}
+
 async function request(endpoint, options = {}) {
   const isFormData = options.body instanceof FormData;
+  const finalBody = isFormData ? await normalizeFormDataImages(options.body) : options.body;
   const config = {
     ...options,
+    body: finalBody,
     headers: {
       ...getAuthHeaders(isFormData),
       ...(options.headers || {}),
@@ -55,9 +80,13 @@ export function toFormData(payload) {
     if (value === undefined) return;
     if (value === null) {
       formData.append(key, '');
-    } else if (value instanceof File) {
-      formData.append(key, value);
-    } else if (typeof value === 'object' && !(value instanceof Blob)) {
+    } else if (value instanceof Blob) {
+      let fileName = value.name || 'kamalig_upload.jpg';
+      if (!/\.(jpg|jpeg|png|webp|gif|bmp|heic|heif|avif|jfif)$/i.test(fileName)) {
+        fileName = `${fileName.replace(/[^a-zA-Z0-9_-]/g, '_') || 'kamalig_upload'}.jpg`;
+      }
+      formData.append(key, value, fileName);
+    } else if (typeof value === 'object') {
       formData.append(key, JSON.stringify(value));
     } else {
       formData.append(key, String(value));

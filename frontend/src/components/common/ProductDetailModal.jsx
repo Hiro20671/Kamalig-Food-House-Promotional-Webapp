@@ -102,6 +102,16 @@ export default function ProductDetailModal({ product, onClose }) {
                   <Tag className="w-3.5 h-3.5 text-[#F6C928]" />
                   {product.category_name}
                 </span>
+                {product.is_sold_out_today ? (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-red-600 text-white border border-red-400">
+                    Sold Out Today • Available Tomorrow
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Available Today
+                  </span>
+                )}
                 {product.is_best_seller && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-[#F28A32] text-[#101C28]">
                     <Award className="w-3.5 h-3.5" />

@@ -85,11 +85,11 @@ export default function AdminDashboardPage() {
       link: '/admin/products',
     },
     {
-      label: 'Hidden / Unpublished',
-      value: s.hidden_or_unpublished_products ?? 0,
-      sub: `${s.archived_products ?? 0} archived items`,
-      icon: EyeOff,
-      color: 'text-gray-300',
+      label: 'Sold Out Today (1-Day)',
+      value: s.sold_out_today_products ?? 0,
+      sub: 'Auto-resets to Available tomorrow',
+      icon: Clock,
+      color: 'text-red-400',
       link: '/admin/products',
     },
     {

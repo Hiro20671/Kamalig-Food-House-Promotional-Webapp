@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 from apps.categories.models import Category
 from apps.media_management.validators import validate_image_file, optimize_uploaded_image
@@ -29,12 +30,23 @@ class Product(models.Model):
     is_best_seller = models.BooleanField(default=False)
     is_published = models.BooleanField(default=True)
     is_archived = models.BooleanField(default=False)
+    sold_out_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text='If set to today (Asia/Manila), this product is marked Sold Out for today only and automatically resets to available tomorrow.',
+    )
     display_order = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['display_order', 'name']
+
+    @property
+    def is_sold_out_today(self):
+        if not self.sold_out_date:
+            return False
+        return self.sold_out_date == timezone.localdate()
 
     def save(self, *args, **kwargs):
         if not self.slug:
